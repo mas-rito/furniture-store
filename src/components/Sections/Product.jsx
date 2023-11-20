@@ -6,6 +6,7 @@ import "swiper/css";
 import "swiper/css/scrollbar";
 import { useState } from "react";
 import MyLink from "../Fragments/MyLink";
+import formatCurrency from "../../services/formatCurrenly";
 
 const IconHeart = () => {
   const [isClick, setIsClick] = useState(false);
@@ -82,13 +83,6 @@ const Slide = (props) => {
   const stars = Array(5).fill(iconStar);
 
   const actualPrice = price - (discount * price) / 100;
-
-  const formatCurrency = (value) => {
-    return value.toLocaleString("en-US", {
-      style: "currency",
-      currency: "USD",
-    });
-  };
 
   return (
     <div className="w-full">

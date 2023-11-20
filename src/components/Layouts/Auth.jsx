@@ -1,11 +1,8 @@
 import { Link } from "react-router-dom";
 import { auth } from "../../assets";
-import { eye } from "../../constant/Icons";
-import { useState } from "react";
 
 const Auth = (props) => {
   const { children, type } = props;
-  const [canSee, setCanSee] = useState(false);
 
   return (
     <div className="flex flex-wrap">

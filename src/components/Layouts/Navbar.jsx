@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { social } from "../../constant";
+import { Link, NavLink } from "react-router-dom";
+import { products, social } from "../../constant";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleNavbar } from "../../redux/slice/navbarSlice";
+import { toggleCartSideBar } from "../../redux/slice/cartSideBarSlice";
+import { x } from "../../constant/Icons";
+import CardCart from "../Fragments/CardCart";
 
 const Notifications = () => {
   const [active, setActive] = useState(true);
@@ -175,20 +178,7 @@ const MobileNav = () => {
           3legant<span className="text-secondary">.</span>
         </h1>
         <button onClick={() => dispatch(toggleNavbar())} className="button">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="30"
-            height="30"
-            viewBox="0 0 20 20"
-            fill="none"
-          >
-            <path
-              fillRule="evenodd"
-              clipRule="evenodd"
-              d="M15.4419 5.44194C15.686 5.19786 15.686 4.80214 15.4419 4.55806C15.1979 4.31398 14.8021 4.31398 14.5581 4.55806L10 9.11612L5.44194 4.55806C5.19786 4.31398 4.80214 4.31398 4.55806 4.55806C4.31398 4.80214 4.31398 5.19786 4.55806 5.44194L9.11612 10L4.55806 14.5581C4.31398 14.8021 4.31398 15.1979 4.55806 15.4419C4.80214 15.686 5.19786 15.686 5.44194 15.4419L10 10.8839L14.5581 15.4419C14.8021 15.686 15.1979 15.1979 15.4419 14.5581C15.686 14.8021 15.686 14.8021 15.4419 14.5581L10.8839 10L15.4419 5.44194Z"
-              fill="#343839"
-            />
-          </svg>
+          {x}
         </button>
       </div>
       <div className="flex flex-col justify-between h-full">
@@ -222,14 +212,19 @@ const MobileNav = () => {
 
         <div className="flex flex-col gap-3 mb-4">
           <ul className="font-medium text-secondary">
-            <li className="border-b border-slate-200 flex justify-between items-center py-4">
-              <h1>Cart</h1>
-              <div className="flex items-center gap-1">
-                <div>{iconCart}</div>
-                <div className="w-6 h-6 bg-primary rounded-full text-white text-center">
-                  2
+            <li>
+              <Link
+                to={"/cart"}
+                className="border-b border-slate-200 flex justify-between items-center py-4"
+              >
+                <h1>Cart</h1>
+                <div className="flex items-center gap-1">
+                  <div>{iconCart}</div>
+                  <div className="w-6 h-6 bg-primary rounded-full text-white text-center">
+                    2
+                  </div>
                 </div>
-              </div>
+              </Link>
             </li>
             <li className="border-b border-slate-200 flex justify-between items-center py-4">
               <h1>Rito Ramadhan</h1>
@@ -254,6 +249,80 @@ const MobileNav = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const FlyoutCart = () => {
+  const isOpen = useSelector((state) => state.cart.isOpen);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isOpen) {
+        window.scrollTo(0, 0);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [isOpen]);
+
+  return (
+    <>
+      {isOpen && (
+        <div
+          className="fixed z-20 left-0 top-0 w-screen h-screen bg-primary bg-opacity-50 fade-in"
+          onClick={() => dispatch(toggleCartSideBar())}
+        ></div>
+      )}
+      <div
+        className={`w-full md:w-1/2 lg:w-1/3 h-screen bg-white ml-auto py-8 px-6 fixed z-30 right-0 top-0 transition-transform duration-300 transform ${
+          isOpen ? "-translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="flex justify-between items-center">
+          <h1 className="font-semibold text-2xl mb-4">Cart</h1>
+          <button onClick={() => dispatch(toggleCartSideBar())}>{x}</button>
+        </div>
+        <div className="flex flex-col justify-between h-full">
+          <div className="w-full h-[55%] flex flex-col overflow-y-scroll scrollbar-hide">
+            {products.map((item, index) => (
+              <CardCart
+                key={index}
+                img={item.image}
+                title={item.name}
+                price={item.price}
+                quantity={2}
+              />
+            ))}
+          </div>
+          <div className="h-[45%] mt-auto">
+            <div className="flex justify-between items-center border-b py-4">
+              <h1 className="text-lg">Subtotal</h1>
+              <h1 className="text-xl font-semibold">$80.00</h1>
+            </div>
+            <div className="flex justify-between items-center py-4 text-2xl font-semibold">
+              <h1>Total</h1>
+              <h1>$234.00</h1>
+            </div>
+            <button className="w-full bg-primary text-white py-3 rounded-lg">
+              Checkout
+            </button>
+            <div className="flex justify-center">
+              <Link
+                className="border-b-2 border-primary hover:text-black  py-2 font-semibold"
+                to={"/cart"}
+              >
+                View Cart
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 
@@ -337,6 +406,7 @@ const Navbar = () => {
     <>
       <Notifications />
       <MobileNav />
+      <FlyoutCart />
       <div className="w-full flex justify-between items-center py-5 px-8 md:px-10 lg:px-[160px]">
         <button
           className="lg:hidden button"
@@ -348,29 +418,37 @@ const Navbar = () => {
           3legant<span className="text-secondary">.</span>
         </h1>
         <div className="hidden lg:flex gap-5 text-secondary text-sm">
-          <Link to="#" className="active hover:text-primary">
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              isActive ? "text-primary" : "hover:text-primary"
+            }
+          >
             Home
-          </Link>
-          <Link to="#" className="hover:text-primary">
+          </NavLink>
+          <NavLink to="/shop" className="hover:text-primary">
             Shop
-          </Link>
-          <Link to="#" className="hover:text-primary">
+          </NavLink>
+          <NavLink to="#" className="hover:text-primary">
             Product
-          </Link>
-          <Link to="#" className="hover:text-primary">
+          </NavLink>
+          <NavLink to="#" className="hover:text-primary">
             Contanct Us
-          </Link>
+          </NavLink>
         </div>
 
         <div className="flex gap-4 items-center">
           <div className="hidden lg:block">{iconSearch}</div>
           <div className="hidden lg:block">{iconProfile}</div>
-          <div className="flex items-center gap-1">
+          <button
+            className="flex items-center gap-1"
+            onClick={() => dispatch(toggleCartSideBar())}
+          >
             <div>{iconCart}</div>
             <div className="w-6 h-6 bg-primary rounded-full text-white text-center">
               2
             </div>
-          </div>
+          </button>
         </div>
       </div>
     </>
